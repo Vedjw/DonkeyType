@@ -2,8 +2,6 @@ package ui
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/Vedjw/DonkeyType/internals/words"
 	"github.com/Vedjw/DonkeyType/state"
@@ -12,45 +10,34 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-var art string = `
-██████╗░░█████╗░███╗░░██╗██╗░░██╗███████╗██╗░░░██╗████████╗██╗░░░██╗██████╗░███████╗
-██╔══██╗██╔══██╗████╗░██║██║░██╔╝██╔════╝╚██╗░██╔╝╚══██╔══╝╚██╗░██╔╝██╔══██╗██╔════╝
-██║░░██║██║░░██║██╔██╗██║█████═╝░█████╗░░░╚████╔╝░░░░██║░░░░╚████╔╝░██████╔╝█████╗░░
-██║░░██║██║░░██║██║╚████║██╔═██╗░██╔══╝░░░░╚██╔╝░░░░░██║░░░░░╚██╔╝░░██╔═══╝░██╔══╝░░
-██████╔╝╚█████╔╝██║░╚███║██║░╚██╗███████╗░░░██║░░░░░░██║░░░░░░██║░░░██║░░░░░███████╗
-╚═════╝░░╚════╝░╚═╝░░╚══╝╚═╝░░╚═╝╚══════╝░░░╚═╝░░░░░░╚═╝░░░░░░╚═╝░░░╚═╝░░░░░╚══════╝`
-
 // ---------- Lipgloss Styles ----------
 
 var (
 	headerStyle = lipgloss.NewStyle().
 			Bold(true).
-			Foreground(lipgloss.Color("128")).
+			Foreground(lipgloss.Color("221")).
 			Underline(true).
-			Padding(1, 2, 0, 2) // top right bottom left
+			Padding(1)
 
 	wordsStyle = lipgloss.NewStyle().
-			Italic(true).
 			Bold(true).
-			Foreground(lipgloss.Color("97")).
-			Padding(1, 2, 1, 2)
+			Foreground(lipgloss.Color("137")).
+			Padding(1)
 
 	textareaStyle = lipgloss.NewStyle().
 			Bold(true).
-			Foreground(lipgloss.Color("211")).
-			Padding(0, 2)
+			Foreground(lipgloss.Color("231")).
+			Padding(1)
 
 	inputStyleCorrect = lipgloss.NewStyle().
 				Bold(true).
-				Foreground(lipgloss.Color("42"))
-		//Padding(1, 2, 1, 2)
+				Foreground(lipgloss.Color("42")).
+				Padding(1)
 
 	inputStyleWrong = lipgloss.NewStyle().
 			Bold(true).
-			Foreground(lipgloss.Color("88"))
-	//Padding(1, 2, 1, 2)
-	cursorStatus = lipgloss.NewStyle().
-			Bold(true)
+			Foreground(lipgloss.Color("160")).
+			Padding(1)
 )
 
 // ---------- Model ----------
@@ -66,7 +53,7 @@ func (o *output) update(val string) {
 	o.output = val
 }
 
-type model struct {
+type textareaModel struct {
 	width      int
 	height     int
 	ta         textarea.Model
@@ -76,7 +63,7 @@ type model struct {
 	useroutput *output
 }
 
-func initialModel() model {
+func initialModel() textareaModel {
 	ta := textarea.New()
 	ta.Placeholder = ""
 	ta.Focus()
@@ -85,21 +72,24 @@ func initialModel() model {
 	ta.Prompt = ""
 	ta.FocusedStyle.Base = textareaStyle
 	ta.Cursor.Blink = false
-
-	return model{
+	m := textareaModel{
 		ta: ta,
 		words: &target{
 			target: words.WordsSelector(state.SelectedLength),
 		},
 		useroutput: &output{output: ""},
 	}
+
+	state.TotalChLength = len(m.words.target)
+
+	return m
 }
 
-func (m model) Init() tea.Cmd {
+func (m textareaModel) Init() tea.Cmd {
 	return textarea.Blink
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m textareaModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
@@ -117,7 +107,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
-		m.ta.SetWidth(msg.Width - 6)
+		m.ta.SetWidth(msg.Width - 4)
 		m.ta.SetHeight(3)
 	}
 
@@ -126,7 +116,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m model) View() string {
+func (m textareaModel) View() string {
 	if m.quitting {
 		return "Exiting...\n"
 	}
@@ -137,15 +127,33 @@ func (m model) View() string {
 
 	header := headerStyle.Width(m.width).Render("START TYPING")
 	words := wordsStyle.Width(m.width).Render(m.words.target)
-	textareaView := textareaStyle.Render(m.ta.View())
-	cursor := m.ta.LineInfo().CharOffset
-	cursorStat := cursorStatus.Render(strconv.Itoa(cursor))
+	textareaView := m.ta.View()
 
-	return lipgloss.JoinVertical(lipgloss.Left, header, words, textareaView, cursorStat)
+	var userInputStatus string
+	if len(m.useroutput.output) > 0 {
+		if !isInputCorrect(m.words, m.useroutput) {
+			userInputStatus = inputStyleWrong.Render("U Goofed up!")
+		} else {
+			userInputStatus = inputStyleCorrect.Render("Keep Going")
+		}
+	}
+
+	return lipgloss.JoinVertical(lipgloss.Left, header, userInputStatus, words, textareaView)
 }
 
-func checkInput(cursor int, t *target, o *output) {
+func isInputCorrect(t *target, o *output) bool {
+	currIndex := len(o.output) - 1
 
+	if currIndex >= len(t.target) {
+		return false
+	}
+
+	if t.target[currIndex] != o.output[currIndex] {
+		state.TotalMistakes++
+		return false
+	}
+
+	return true
 }
 
 func RenderTextarea() error {

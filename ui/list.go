@@ -11,25 +11,31 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-const listHeight = 12
+var titleArt string = `
+▄     ▌     ▄▖      
+▌▌▛▌▛▌▙▘█▌▌▌▐ ▌▌▛▌█▌
+▙▘▙▌▌▌▛▖▙▖▙▌▐ ▙▌▙▌▙▖
+          ▄▌  ▄▌▌                                     
+`
+var titleArtTrimmed = strings.TrimSpace(titleArt)
+
+const listHeight = 15
+
+var isQuitting bool
 
 var (
 	mainTitleStyle = lipgloss.NewStyle().
-			Bold(true).
-			Foreground(lipgloss.Color("219")). // optional color
-			Height(2).
+			Foreground(lipgloss.Color("221")).
 			MarginLeft(2).
-			Underline(true).
 			Align(lipgloss.Left)
 
 	subTitleStyle = lipgloss.NewStyle().
 			Italic(true).
-			Foreground(lipgloss.Color("195")). // subtle grey
-			MarginLeft(0)
+			Foreground(lipgloss.Color("195")).
+			Padding(1, 0, 0, 0)
 
-	titleStyle        = lipgloss.NewStyle().MarginLeft(2) // fallback default
 	itemStyle         = lipgloss.NewStyle().PaddingLeft(4)
-	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
+	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("208"))
 	paginationStyle   = list.DefaultStyles().PaginationStyle.PaddingLeft(4)
 	helpStyle         = list.DefaultStyles().HelpStyle.PaddingLeft(4).PaddingBottom(1)
 	quitTextStyle     = lipgloss.NewStyle().Margin(1, 0, 2, 4)
@@ -82,6 +88,7 @@ func (m listModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch keypress := msg.String(); keypress {
 		case "q", "ctrl+c":
 			m.quitting = true
+			isQuitting = true
 			return m, tea.Quit
 
 		case "enter":
@@ -110,7 +117,7 @@ func (m listModel) View() string {
 	return "\n" + m.list.View()
 }
 
-func RenderList() error {
+func RenderList() (bool, error) {
 	items := []list.Item{
 		item("short"),
 		item("medium"),
@@ -122,20 +129,20 @@ func RenderList() error {
 
 	l := list.New(items, itemDelegate{}, defaultWidth, listHeight)
 	l.Title = lipgloss.JoinVertical(lipgloss.Left,
-		mainTitleStyle.Render("WELCOME TO DONKEYTYPE"),
+		mainTitleStyle.Render(titleArtTrimmed),
 		subTitleStyle.Render("Choose Difficulty"),
 	)
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
-	l.Styles.Title = titleStyle
+	l.Styles.Title = mainTitleStyle
 	l.Styles.PaginationStyle = paginationStyle
 	l.Styles.HelpStyle = helpStyle
 
 	m := listModel{list: l}
 
 	if _, err := tea.NewProgram(m).Run(); err != nil {
-		return err
+		return true, err
 	}
 
-	return nil
+	return isQuitting, nil
 }
