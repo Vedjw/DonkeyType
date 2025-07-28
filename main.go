@@ -40,7 +40,7 @@ func main() {
 				playAgain = !quit
 			}
 			if err != nil {
-				fmt.Println("Error running program RenderFullscreen:", err)
+				fmt.Println("Error running program RenderTextarea:", err)
 				os.Exit(1)
 			}
 		}
