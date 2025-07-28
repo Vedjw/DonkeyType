@@ -40,8 +40,6 @@ var (
 			Foreground(lipgloss.Color("160"))
 )
 
-var start time.Time
-
 type target struct {
 	target string
 }
@@ -182,8 +180,6 @@ func isInputCorrect(t *target, o *output) bool {
 
 	return t.target[currIndex] == o.output[currIndex]
 }
-
-var isQuitting bool
 
 func RenderTextarea() (bool, error) {
 	if _, err := tea.NewProgram(initialModel(), tea.WithAltScreen()).Run(); err != nil {

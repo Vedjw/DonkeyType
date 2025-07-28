@@ -3,7 +3,7 @@
 DonkeyType is a terminal-based typing game written in Go using [Bubble Tea](https://github.com/charmbracelet/bubbletea) and [Lip Gloss](https://github.com/charmbracelet/lipgloss).  
 It's minimal, retro-styled, and focused on improving your typing speed.
 
-![DonkeyType Screenshot](assets/donkeytype.png)
+![DonkeyType Screenshot](assets/UI.png)
 
 ---
 

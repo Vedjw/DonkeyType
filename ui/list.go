@@ -86,6 +86,7 @@ func (m listModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch keypress := msg.String(); keypress {
 		case "q", "ctrl+c":
 			m.quitting = true
+			isQuitting = m.quitting
 			return m, tea.Quit
 
 		case "enter":
@@ -114,6 +115,8 @@ func (m listModel) View() string {
 	return "\n" + m.list.View()
 }
 
+var isQuitting bool
+
 func RenderList() (bool, error) {
 	items := []list.Item{
 		item("short"),
@@ -141,5 +144,5 @@ func RenderList() (bool, error) {
 		return true, err
 	}
 
-	return m.quitting, nil
+	return isQuitting, nil
 }

@@ -12,6 +12,9 @@ func main() {
 	playAgain := true
 	for playAgain {
 		quit, err := ui.RenderList()
+		if quit {
+			playAgain = !quit
+		}
 		if err != nil {
 			fmt.Println("Error running program RenderList:", err)
 			os.Exit(1)
