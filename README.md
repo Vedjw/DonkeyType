@@ -32,6 +32,6 @@ It's minimal, retro-styled, and focused on improving your typing speed.
 
 ```bash
 git clone https://github.com/Vedjw/DonkeyType
-cd donkeytype
+cd DonkeyType
 go run main.go
 ```
