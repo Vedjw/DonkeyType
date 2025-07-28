@@ -3,10 +3,25 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
+	"github.com/Vedjw/DonkeyType/internals/words"
 	"github.com/Vedjw/DonkeyType/state"
 	"github.com/Vedjw/DonkeyType/ui"
 )
+
+func init() {
+	// Make mistake map
+	state.MistakeMap = make(map[int]bool)
+
+	// Populate dictionary
+	for _, word := range strings.Split(words.WordsRaw, "\n") {
+		word = strings.TrimSpace(word)
+		if word != "" {
+			words.Dictionary = append(words.Dictionary, word)
+		}
+	}
+}
 
 func main() {
 	playAgain := true

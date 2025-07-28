@@ -9,22 +9,9 @@ import (
 )
 
 //go:embed 5k.txt
-var wordsRaw string
+var WordsRaw string
 
-var dictionary []string
-
-func init() {
-	// Make mistake map
-	state.MistakeMap = make(map[int]bool)
-
-	// Populate dictionary
-	for _, word := range strings.Split(wordsRaw, "\n") {
-		word = strings.TrimSpace(word)
-		if word != "" {
-			dictionary = append(dictionary, word)
-		}
-	}
-}
+var Dictionary []string
 
 func WordsSelector(lengthChoice state.Length) string {
 	var wordLength int
@@ -46,7 +33,7 @@ func WordsSelector(lengthChoice state.Length) string {
 
 	for i := 0; i < wordLength; i++ {
 		ri := rand.Intn(5000)
-		builder.WriteString(dictionary[ri])
+		builder.WriteString(Dictionary[ri])
 		builder.WriteString(" ")
 	}
 
