@@ -18,7 +18,7 @@ var resultContent = `
 └───────────────────────┘
 
   Time Taken   : %v
-  WPM          : %d
+  WPM          : %.2f
   Mistakes     : %d
 
   Press Enter to play again, or q to quit...
@@ -28,7 +28,7 @@ var playAgain bool
 
 type Result struct {
 	TotalMistakes int
-	WPM           int
+	WPM           float32
 	TimeTaken     float64
 }
 
@@ -70,7 +70,7 @@ func RenderResults() (bool, error) {
 	initialModel := resultModel{
 		result: Result{
 			TotalMistakes: state.TotalMistakes,
-			WPM:           int(calWPM()),
+			WPM:           calWPM(),
 			TimeTaken:     state.TimeTaken.Seconds(),
 		},
 	}
