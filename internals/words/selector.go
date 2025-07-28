@@ -8,12 +8,16 @@ import (
 	"github.com/Vedjw/DonkeyType/state"
 )
 
-//go:embed 10k.txt
+//go:embed 5k.txt
 var wordsRaw string
 
 var dictionary []string
 
 func init() {
+	// Make mistake map
+	state.MistakeMap = make(map[int]bool)
+
+	// Populate dictionary
 	for _, word := range strings.Split(wordsRaw, "\n") {
 		word = strings.TrimSpace(word)
 		if word != "" {
@@ -41,7 +45,7 @@ func WordsSelector(lengthChoice state.Length) string {
 	var builder strings.Builder
 
 	for i := 0; i < wordLength; i++ {
-		ri := rand.Intn(10000)
+		ri := rand.Intn(5000)
 		builder.WriteString(dictionary[ri])
 		builder.WriteString(" ")
 	}

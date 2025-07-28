@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"fmt"
+	"time"
 
 	"github.com/Vedjw/DonkeyType/internals/words"
 	"github.com/Vedjw/DonkeyType/state"
@@ -10,13 +10,10 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// ---------- Lipgloss Styles ----------
-
 var (
 	headerStyle = lipgloss.NewStyle().
 			Bold(true).
 			Foreground(lipgloss.Color("221")).
-			Underline(true).
 			Padding(1)
 
 	wordsStyle = lipgloss.NewStyle().
@@ -29,18 +26,21 @@ var (
 			Foreground(lipgloss.Color("231")).
 			Padding(1)
 
+	statusStyle = lipgloss.NewStyle().
+			Bold(true).
+			Foreground(lipgloss.Color("231")).
+			Padding(0, 1)
+
 	inputStyleCorrect = lipgloss.NewStyle().
 				Bold(true).
-				Foreground(lipgloss.Color("42")).
-				Padding(1)
+				Foreground(lipgloss.Color("42"))
 
 	inputStyleWrong = lipgloss.NewStyle().
 			Bold(true).
-			Foreground(lipgloss.Color("160")).
-			Padding(1)
+			Foreground(lipgloss.Color("160"))
 )
 
-// ---------- Model ----------
+var start time.Time
 
 type target struct {
 	target string
@@ -51,6 +51,7 @@ type output struct {
 
 func (o *output) update(val string) {
 	o.output = val
+	state.TotalUserInputLenght = len(o.output)
 }
 
 type textareaModel struct {
@@ -61,6 +62,7 @@ type textareaModel struct {
 	confirmed  bool
 	words      *target
 	useroutput *output
+	usertime   time.Time
 }
 
 func initialModel() textareaModel {
@@ -72,6 +74,7 @@ func initialModel() textareaModel {
 	ta.Prompt = ""
 	ta.FocusedStyle.Base = textareaStyle
 	ta.Cursor.Blink = false
+
 	m := textareaModel{
 		ta: ta,
 		words: &target{
@@ -97,9 +100,16 @@ func (m textareaModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c", "esc":
 			m.quitting = true
+			isQuitting = m.quitting
 			return m, tea.Quit
 		case "enter":
 			if m.ta.Focused() {
+				end := time.Now()
+				if m.usertime.IsZero() {
+					state.TimeTaken = 0
+				} else {
+					state.TimeTaken = end.Sub(m.usertime)
+				}
 				m.confirmed = true
 				return m, tea.Quit
 			}
@@ -111,30 +121,52 @@ func (m textareaModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.ta.SetHeight(3)
 	}
 
+	// Update user's typed output
 	m.useroutput.update(m.ta.Value())
+
+	// Start timer on first keystroke
+	if m.usertime.IsZero() && len(m.useroutput.output) > 0 {
+		m.usertime = time.Now()
+	}
+
+	// Count mistake only once per wrong index
+	if len(m.useroutput.output) > 0 {
+		currIndex := len(m.useroutput.output) - 1
+		if currIndex < len(m.words.target) &&
+			m.words.target[currIndex] != m.useroutput.output[currIndex] &&
+			!state.MistakeMap[currIndex] {
+
+			state.TotalMistakes++
+			state.MistakeMap[currIndex] = true
+		}
+	}
+
+	// Update textarea
 	m.ta, cmd = m.ta.Update(msg)
 	return m, cmd
 }
 
 func (m textareaModel) View() string {
 	if m.quitting {
-		return "Exiting...\n"
+		return quitTextStyle.Render("Come back again")
 	}
 
 	if m.confirmed {
-		return fmt.Sprintf("You typed:\n%s", m.ta.Value())
+		return ""
 	}
 
 	header := headerStyle.Width(m.width).Render("START TYPING")
 	words := wordsStyle.Width(m.width).Render(m.words.target)
 	textareaView := m.ta.View()
 
+	status := statusStyle.Render("Status: ")
 	var userInputStatus string
+	userInputStatus = status
 	if len(m.useroutput.output) > 0 {
 		if !isInputCorrect(m.words, m.useroutput) {
-			userInputStatus = inputStyleWrong.Render("U Goofed up!")
+			userInputStatus = status + inputStyleWrong.Render("U Goofed up!")
 		} else {
-			userInputStatus = inputStyleCorrect.Render("Keep Going")
+			userInputStatus = status + inputStyleCorrect.Render("Keep Going")
 		}
 	}
 
@@ -148,17 +180,14 @@ func isInputCorrect(t *target, o *output) bool {
 		return false
 	}
 
-	if t.target[currIndex] != o.output[currIndex] {
-		state.TotalMistakes++
-		return false
-	}
-
-	return true
+	return t.target[currIndex] == o.output[currIndex]
 }
 
-func RenderTextarea() error {
+var isQuitting bool
+
+func RenderTextarea() (bool, error) {
 	if _, err := tea.NewProgram(initialModel(), tea.WithAltScreen()).Run(); err != nil {
-		return err
+		return false, err
 	}
-	return nil
+	return isQuitting, nil
 }

@@ -21,8 +21,6 @@ var titleArtTrimmed = strings.TrimSpace(titleArt)
 
 const listHeight = 15
 
-var isQuitting bool
-
 var (
 	mainTitleStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("221")).
@@ -88,7 +86,6 @@ func (m listModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch keypress := msg.String(); keypress {
 		case "q", "ctrl+c":
 			m.quitting = true
-			isQuitting = true
 			return m, tea.Quit
 
 		case "enter":
@@ -144,5 +141,5 @@ func RenderList() (bool, error) {
 		return true, err
 	}
 
-	return isQuitting, nil
+	return m.quitting, nil
 }
