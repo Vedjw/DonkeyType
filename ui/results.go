@@ -17,7 +17,7 @@ var resultContent = `
 │        Results        │
 └───────────────────────┘
 
-  Time Taken   : %v
+  Time Taken   : %.2f
   WPM          : %.2f
   Mistakes     : %d
 
@@ -56,8 +56,7 @@ func (m resultModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m resultModel) View() string {
-	seconds := int(state.TimeTaken.Seconds())
-	str := resultStyle.Render(fmt.Sprintf(resultContent, seconds, m.result.WPM, m.result.TotalMistakes))
+	str := resultStyle.Render(fmt.Sprintf(resultContent, m.result.TimeTaken, m.result.WPM, m.result.TotalMistakes))
 	return str
 }
 
