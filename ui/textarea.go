@@ -18,7 +18,7 @@ var (
 
 	wordsStyle = lipgloss.NewStyle().
 			Bold(true).
-			Foreground(lipgloss.Color("137")).
+			Foreground(lipgloss.Color("211")).
 			Padding(1)
 
 	textareaStyle = lipgloss.NewStyle().

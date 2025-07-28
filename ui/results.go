@@ -9,7 +9,8 @@ import (
 )
 
 var resultStyle = lipgloss.NewStyle().
-	Foreground(lipgloss.Color("221"))
+	Foreground(lipgloss.Color("221")).
+	Bold(true)
 
 var resultContent = `
 ┌───────────────────────┐
