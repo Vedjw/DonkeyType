@@ -56,7 +56,8 @@ func (m resultModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m resultModel) View() string {
-	str := resultStyle.Render(fmt.Sprintf(resultContent, m.result.TimeTaken, m.result.WPM, m.result.TotalMistakes))
+	seconds := int(state.TimeTaken.Seconds())
+	str := resultStyle.Render(fmt.Sprintf(resultContent, seconds, m.result.WPM, m.result.TotalMistakes))
 	return str
 }
 
