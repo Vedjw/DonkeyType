@@ -31,7 +31,7 @@ It's minimal, retro-styled, and focused on improving your typing speed.
 ## 🛠️ Installation
 
 ```bash
-git clone https://github.com/your-username/donkeytype.git
+git clone https://github.com/Vedjw/DonkeyType
 cd donkeytype
 go run main.go
 ```
