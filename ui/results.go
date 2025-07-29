@@ -13,9 +13,9 @@ var resultStyle = lipgloss.NewStyle().
 	Bold(true)
 
 var resultContent = `
-┌───────────────────────┐
-│        Results        │
-└───────────────────────┘
+  ┌───────────────────────┐
+  │        Results        │
+  └───────────────────────┘
 
   Time Taken   : %.2f
   WPM          : %.2f

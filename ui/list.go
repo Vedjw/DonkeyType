@@ -28,9 +28,8 @@ var (
 			Align(lipgloss.Left)
 
 	subTitleStyle = lipgloss.NewStyle().
-			Italic(true).
 			Foreground(lipgloss.Color("231")).
-			Padding(1, 0, 0, 0)
+			Margin(1, 0, 0, 0)
 
 	itemStyle         = lipgloss.NewStyle().PaddingLeft(4)
 	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("208"))
