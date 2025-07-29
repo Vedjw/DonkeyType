@@ -21,7 +21,7 @@ var resultContent = `
   WPM          : %.2f
   Mistakes     : %d
 
-  Press Enter to play again, or q to quit...
+  Enter to play again • q quit
 `
 
 var playAgain bool

@@ -29,7 +29,7 @@ var (
 
 	subTitleStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("231")).
-			Margin(1, 0, 0, 0)
+			Padding(1, 0, 0, 0)
 
 	itemStyle         = lipgloss.NewStyle().PaddingLeft(4)
 	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("208"))
@@ -78,7 +78,7 @@ func (m listModel) Init() tea.Cmd {
 func (m listModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.list.SetWidth(msg.Width)
+		m.list.SetWidth(msg.Width + 140) // Find better fix
 		return m, nil
 
 	case tea.KeyMsg:
